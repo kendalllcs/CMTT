@@ -18,8 +18,8 @@ CMTT aims to offer quick assessment of software quality metrics such as Lines of
 4. Drop Python files into the monitored folder for automatic analysis.
 
 ## Dependencies
-- Python 3.x
-- watchdog library
+- Install dependencies using pip:
+- pip install -r requirements.txt
 
 ## Usage
 1. Ensure Python 3.x and the required dependencies are installed.
