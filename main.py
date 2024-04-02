@@ -1,11 +1,16 @@
 import os
 import sys
 import time
+import coverage  # Import coverage module
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 import radon.metrics as metrics  # For code metrics calculation (e.g., LOC, Cyclomatic Complexity)
 import radon.complexity as complexity
 
+
+# Start coverage
+cov = coverage.Coverage()
+cov.start()
 
 # Function to check if a file exists in the neighboring directory
 def check_neighboring_file(filename):
@@ -52,7 +57,8 @@ class FileEventHandler(FileSystemEventHandler):
                 # Calculate metrics
                 loc = metrics.loc(code)
                 cc = metrics.cc_visit(code)
-                print(f"LOC: {loc}, Cyclomatic Complexity: {cc}")
+                coverage_result = cov.analysis2(os.path.abspath(event.src_path))  # Get coverage result
+                print(f"LOC: {loc}, Cyclomatic Complexity: {cc}, Code Coverage: {coverage_result[3]}%")
 
 def start_monitoring(folder):
     event_handler = FileEventHandler()
@@ -67,9 +73,6 @@ def start_monitoring(folder):
     observer.join()
 
 if __name__ == "__main__":
-    # Monitoring the 'cloneHere' folder for Python files
-    monitored_folder = 'cloneHere'
-
     # Check if a filename is provided as a command-line argument
     if len(sys.argv) < 2:
         print("Please provide the filename of the neighboring file.")
@@ -77,4 +80,12 @@ if __name__ == "__main__":
 
     filename = sys.argv[1]
     analyze_neighboring_file(filename)
+
+    # Monitoring the 'cloneHere' folder for Python files
+    monitored_folder = 'cloneHere'
     start_monitoring(monitored_folder)
+
+# Stop coverage and generate report
+cov.stop()
+cov.save()
+cov.report()
