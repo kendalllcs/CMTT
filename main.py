@@ -38,9 +38,13 @@ def analyze_neighboring_file(filename):
             print("Cyclomatic Complexity:")
             for result in cc_results:
                 print(f"Function: {result.name}, Complexity: {result.complexity}")
+            # Calculate defect density
+            missed_lines = code.count('\n')  # Assume missed lines as uncovered lines for simplicity
+            total_lines = loc
+            defect_density = missed_lines / total_lines if total_lines > 0 else 0
+            print(f"Defect Density: {defect_density:.2f}")
     else:
         print("Neighboring file not found.")
-
 
 # Function to analyze Python files dropped into the monitored folder
 class FileEventHandler(FileSystemEventHandler):
@@ -58,7 +62,10 @@ class FileEventHandler(FileSystemEventHandler):
                 loc = metrics.loc(code)
                 cc = metrics.cc_visit(code)
                 coverage_result = cov.analysis2(os.path.abspath(event.src_path))  # Get coverage result
-                print(f"LOC: {loc}, Cyclomatic Complexity: {cc}, Code Coverage: {coverage_result[3]}%")
+                missed_lines = coverage_result[2]
+                total_lines = coverage_result[1]
+                defect_density = missed_lines / total_lines if total_lines > 0 else 0
+                print(f"LOC: {loc}, Cyclomatic Complexity: {cc}, Defect Density: {defect_density:.2f}")
 
 def start_monitoring(folder):
     event_handler = FileEventHandler()
@@ -70,7 +77,7 @@ def start_monitoring(folder):
             time.sleep(1)
     except KeyboardInterrupt:
         observer.stop()
-    observer.join()
+        observer.join()
 
 if __name__ == "__main__":
     # Check if a filename is provided as a command-line argument
@@ -85,7 +92,7 @@ if __name__ == "__main__":
     monitored_folder = 'cloneHere'
     start_monitoring(monitored_folder)
 
-# Stop coverage and generate report
-cov.stop()
-cov.save()
-cov.report()
+    # Stop coverage and generate report
+    cov.stop()
+    cov.save()
+    cov.report()
