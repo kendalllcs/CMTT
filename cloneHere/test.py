@@ -1,43 +1,37 @@
-# Measures to be made:
-# - Lines of Code (LOC): 15
-# - Cyclomatic Complexity: 3
-# - Code Coverage: 100% (not feasible to demonstrate in this example)
-# - Defect Density: 0 (no obvious defects in this code snippet)
+# Example Python code for testing code metrics
 
-import random
-
-def generate_random_numbers(num):
+def calculate_factorial(n):
     """
-    Generates a list of random numbers.
+    Function to calculate the factorial of a number.
     """
-    return [random.randint(1, 100) for _ in range(num)]
+    if n == 0:
+        return 1
+    else:
+        return n * calculate_factorial(n-1)
 
-def is_odd(num):
+def fibonacci(n):
     """
-    Checks if a number is odd.
+    Function to calculate the nth Fibonacci number.
     """
-    return num % 2 != 0
+    if n <= 1:
+        return n
+    else:
+        return fibonacci(n-1) + fibonacci(n-2)
 
-def count_odd_numbers(numbers):
+def is_prime(n):
     """
-    Counts the number of odd numbers in a list.
+    Function to check if a number is prime.
     """
-    count = 0
-    for num in numbers:
-        if is_odd(num):
-            count += 1
-    return count
+    if n <= 1:
+        return False
+    for i in range(2, int(n**0.5) + 1):
+        if n % i == 0:
+            return False
+    return True
 
-if __name__ == "__main__":
-    # Test code for lines of code (LOC)
-    random_numbers = generate_random_numbers(10)
-    print("Random numbers:", random_numbers)
-
-    # Test code for cyclomatic complexity
-    odd_count = count_odd_numbers(random_numbers)
-    print("Number of odd numbers:", odd_count)
-
-    # Test code for code coverage (not feasible to demonstrate here)
-
-    # Test code for defect density measure
-    # There are no obvious defects in this code snippet.
+# Example usage:
+print("Factorial of 5:", calculate_factorial(5))
+print("Fibonacci sequence up to 10:")
+for i in range(10):
+    print(fibonacci(i), end=" ")
+print("\nIs 17 prime?", is_prime(17))
