@@ -1,18 +1,17 @@
-import os # For file path operations
-import sys # For command-line arguments
-import time # For sleep function
-import coverage  # Import coverage module
-from watchdog.observers import Observer # For monitoring file system events
-from watchdog.events import FileSystemEventHandler # For handling file system events
-import radon.metrics as metrics  # For code metrics calculation (e.g., LOC, Cyclomatic Complexity)
+import os
+import sys
+import time
+import coverage
+from watchdog.observers import Observer
+from watchdog.events import FileSystemEventHandler
+import radon.metrics as metrics
 import radon.complexity as complexity
+from rich import print
+
+cov = coverage.Coverage()
+cov.start()
 
 
-# Start coverage
-cov = coverage.Coverage() #initialize coverage
-cov.start() # Start Code coverage measurement
-
-# Function to check if a file exists in the neighboring directory
 def check_neighboring_file(filename):
     script_dir = os.path.dirname(os.path.abspath(__file__))
     neighboring_dir = os.path.join(script_dir, 'cloneHere')
@@ -22,50 +21,46 @@ def check_neighboring_file(filename):
     else:
         return None
 
-# Function to read and analyze code from a neighboring file
+
 def analyze_neighboring_file(filename):
     neighboring_file_path = check_neighboring_file(filename)
-    if neighboring_file_path: 
-        with open(neighboring_file_path, 'r') as file: 
+    if neighboring_file_path:
+        with open(neighboring_file_path, 'r') as file:
             code = file.read()
-            # Print code for verification
-            print("Code from neighboring file:")
+            print("[bold cyan]Code from neighboring file:[/bold cyan]")
             print(code)
-            # Calculate metrics
-            loc = code.count('\n') + 1 #LOC Calculation
-            cc_results = complexity.cc_visit(code) #Cyclomatic Complexity Calculation
-            print(f"LOC: {loc}")
-            print("Cyclomatic Complexity:")
+            loc = code.count('\n') + 1
+            cc_results = complexity.cc_visit(code)
+            print("[blue]LOC:[/blue] [cyan]" + str(loc) + "[/cyan]")
+            print("[bold cyan]Cyclomatic Complexity:[/bold cyan]")
             for result in cc_results:
-                print(f"Function: {result.name}, Complexity: {result.complexity}")
-            # Calculate defect density
-            missed_lines = code.count('\n')  # Assume missed lines as uncovered lines for simplicity
+                print("[green]Function:[/green] [bold green]" + result.name + "[/bold green], [green]Complexity:[/green] [bold green]" + str(result.complexity) + "[/bold green]")
+            missed_lines = code.count('\n')
             total_lines = loc
-            defect_density = missed_lines / total_lines if total_lines > 0 else 0  # Defect Density Calculation
-            print(f"Defect Density: {defect_density:.2f}")
+            defect_density = missed_lines / total_lines if total_lines > 0 else 0
+            print("[blue]Defect Density:[/blue] [cyan]" + "{:.2f}".format(defect_density) + "[/cyan]")
     else:
         print("Neighboring file not found.")
 
-# Function to analyze Python files dropped into the monitored folder
+
 class FileEventHandler(FileSystemEventHandler):
     def on_created(self, event):
-        if event.is_directory: #Check if the created file is a directory
+        if event.is_directory:
             return
-        elif event.src_path.endswith('.py'): #Check if the created file is a Python file
-            print(f"Analyzing file: {event.src_path}")
+        elif event.src_path.endswith('.py'):
+            print("[bold yellow]Analyzing file: {event.src_path}[/bold yellow]")
             with open(event.src_path, 'r') as file:
                 code = file.read()
-                # Print code for verification
-                print("Code from created file:")
+                print("[bold cyan]Code from created file:[/bold cyan]")
                 print(code)
-                # Calculate metrics
                 loc = metrics.loc(code)
                 cc = metrics.cc_visit(code)
-                coverage_result = cov.analysis2(os.path.abspath(event.src_path))  #Get coverage result
+                coverage_result = cov.analysis2(os.path.abspath(event.src_path))
                 missed_lines = coverage_result[2]
                 total_lines = coverage_result[1]
                 defect_density = missed_lines / total_lines if total_lines > 0 else 0
                 print(f"LOC: {loc}, Cyclomatic Complexity: {cc}, Defect Density: {defect_density:.2f}")
+
 
 def start_monitoring(folder):
     event_handler = FileEventHandler()
@@ -79,20 +74,19 @@ def start_monitoring(folder):
         observer.stop()
         observer.join()
 
+
 if __name__ == "__main__":
-    # Check if a filename is provided as a command-line argument
     if len(sys.argv) < 2:
-        print("Please provide the filename of the neighboring file.")
+        print("[bold red]Please provide the filename of the neighboring file.[/bold red]")
         sys.exit(1)
 
     filename = sys.argv[1]
     analyze_neighboring_file(filename)
 
-    # Monitoring the 'cloneHere' folder for Python files
-    monitored_folder = 'cloneHere' # Folder to be monitored
+    monitored_folder = 'cloneHere'
     start_monitoring(monitored_folder)
 
-    # Stop coverage and generate report
     cov.stop()
-    cov.save() #save coverage data
-    cov.report() #generate coverage report and prints
+    cov.save()
+    print("[bold magenta]Coverage Report[/bold magenta]")
+    cov.report(show_missing=False, ignore_errors=True, file=sys.stdout)
