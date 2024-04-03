@@ -25,12 +25,6 @@ CMTT aims to offer quick assessments of software quality metrics such as Lines o
 Ensure you have Python 3.x installed and then install project dependencies:
 pip install -r requirements.txt
 
-## Usage
-
-1. Install Python 3.x and the required dependencies.
-2. From the terminal, run `python main_script.py`.
-3. Drop Python files into the monitored folder to trigger automatic analysis.
-
 ## Contributing
 
 Contributions to enhance the tool or add new features are welcome! Please fork the repository, make your changes, and submit a pull request.
