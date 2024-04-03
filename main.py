@@ -9,8 +9,8 @@ import radon.complexity as complexity
 
 
 # Start coverage
-cov = coverage.Coverage()
-cov.start()
+cov = coverage.Coverage() #initialize coverage
+cov.start() # Start Code coverage measurement
 
 # Function to check if a file exists in the neighboring directory
 def check_neighboring_file(filename):
@@ -32,8 +32,8 @@ def analyze_neighboring_file(filename):
             print("Code from neighboring file:")
             print(code)
             # Calculate metrics
-            loc = code.count('\n') + 1
-            cc_results = complexity.cc_visit(code)
+            loc = code.count('\n') + 1 #LOC Calculation
+            cc_results = complexity.cc_visit(code) #Cyclomatic Complexity Calculation
             print(f"LOC: {loc}")
             print("Cyclomatic Complexity:")
             for result in cc_results:
@@ -41,7 +41,7 @@ def analyze_neighboring_file(filename):
             # Calculate defect density
             missed_lines = code.count('\n')  # Assume missed lines as uncovered lines for simplicity
             total_lines = loc
-            defect_density = missed_lines / total_lines if total_lines > 0 else 0
+            defect_density = missed_lines / total_lines if total_lines > 0 else 0  # Defect Density Calculation
             print(f"Defect Density: {defect_density:.2f}")
     else:
         print("Neighboring file not found.")
@@ -89,10 +89,10 @@ if __name__ == "__main__":
     analyze_neighboring_file(filename)
 
     # Monitoring the 'cloneHere' folder for Python files
-    monitored_folder = 'cloneHere'
+    monitored_folder = 'cloneHere' # Folder to be monitored
     start_monitoring(monitored_folder)
 
     # Stop coverage and generate report
     cov.stop()
-    cov.save()
-    cov.report()
+    cov.save() #save coverage data
+    cov.report() #generate coverage report and prints
