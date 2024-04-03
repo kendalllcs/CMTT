@@ -1,9 +1,9 @@
-import os
-import sys
-import time
+import os # For file path operations
+import sys # For command-line arguments
+import time # For sleep function
 import coverage  # Import coverage module
-from watchdog.observers import Observer
-from watchdog.events import FileSystemEventHandler
+from watchdog.observers import Observer # For monitoring file system events
+from watchdog.events import FileSystemEventHandler # For handling file system events
 import radon.metrics as metrics  # For code metrics calculation (e.g., LOC, Cyclomatic Complexity)
 import radon.complexity as complexity
 
@@ -25,8 +25,8 @@ def check_neighboring_file(filename):
 # Function to read and analyze code from a neighboring file
 def analyze_neighboring_file(filename):
     neighboring_file_path = check_neighboring_file(filename)
-    if neighboring_file_path:
-        with open(neighboring_file_path, 'r') as file:
+    if neighboring_file_path: 
+        with open(neighboring_file_path, 'r') as file: 
             code = file.read()
             # Print code for verification
             print("Code from neighboring file:")
@@ -49,9 +49,9 @@ def analyze_neighboring_file(filename):
 # Function to analyze Python files dropped into the monitored folder
 class FileEventHandler(FileSystemEventHandler):
     def on_created(self, event):
-        if event.is_directory:
+        if event.is_directory: #Check if the created file is a directory
             return
-        elif event.src_path.endswith('.py'):
+        elif event.src_path.endswith('.py'): #Check if the created file is a Python file
             print(f"Analyzing file: {event.src_path}")
             with open(event.src_path, 'r') as file:
                 code = file.read()
@@ -61,7 +61,7 @@ class FileEventHandler(FileSystemEventHandler):
                 # Calculate metrics
                 loc = metrics.loc(code)
                 cc = metrics.cc_visit(code)
-                coverage_result = cov.analysis2(os.path.abspath(event.src_path))  # Get coverage result
+                coverage_result = cov.analysis2(os.path.abspath(event.src_path))  #Get coverage result
                 missed_lines = coverage_result[2]
                 total_lines = coverage_result[1]
                 defect_density = missed_lines / total_lines if total_lines > 0 else 0
