@@ -17,7 +17,7 @@ CMTT aims to offer quick assessments of software quality metrics such as Lines o
 
 1. Clone the repository to your local machine.
 2. Install the required dependencies with `pip install -r requirements.txt`.
-3. Execute `main_script.py` to start monitoring the designated folder.
+3. Execute `python main.py testFileName.py` to start monitoring the designated folder.
 4. Drop Python files into the monitored folder for automatic analysis.
 
 ## Dependencies
