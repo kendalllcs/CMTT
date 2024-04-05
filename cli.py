@@ -150,12 +150,12 @@ def main_menu():
             break
 
         if choice == '1':
-            console.clear()  # Clear the screen before displaying instructions
+            clear_screen()  # Clear the screen before displaying instructions
             display_instructions()  # Assuming this function prints the instructions
             wait_and_clear()
 
         elif choice == '2':
-            console.clear()
+            clear_screen()
             git_link = console.input("Enter the .git link to clone (or type 'exit' to return to main menu): ")
             if git_link.lower() == 'exit':
                 continue  # Go back to the main menu loop
@@ -163,18 +163,18 @@ def main_menu():
             wait_and_clear()
 
         elif choice == '3':
-            console.clear()
+            clear_screen()
             # Use the file_event_handler instance here
             file_event_handler.analyze_neighboring_files()
             wait_and_clear()
 
         elif choice == '4':
-            console.clear()
+            clear_screen()
             display_summary_report()
             wait_and_clear()
 
         elif choice == '5':
-            console.clear()
+            clear_screen()
             delete_all_files()
             wait_and_clear()
 
@@ -183,6 +183,10 @@ def main_menu():
             wait_and_clear()
 
     console.print("Exiting Code Metrics Tool CLI.", style="warning")
+
+def clear_screen():
+    """Clears the terminal screen."""
+    os.system('cls')
 
 
 def main():
