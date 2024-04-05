@@ -1,6 +1,6 @@
 # CodeMetrics Terminal Tool (CMTT)
 
-![Alt text](CMTT/ASSET/MainMenu.png)
+![Alt text](/ASSET/MainMenu.png)
 
 
 The CodeMetrics Terminal Tool (CMTT) is a Python-based software metrics analysis tool designed to provide software developers and project managers with immediate insights into code quality directly from the terminal. 
