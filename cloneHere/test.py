@@ -1,37 +1,12 @@
-# Example Python code for testing code metrics
+# test1.py
 
-def calculate_factorial(n):
-    """
-    Function to calculate the factorial of a number.
-    """
-    if n == 0:
-        return 1
+def is_even(number):
+    if number % 2 == 0:
+        return True
     else:
-        return n * calculate_factorial(n-1)
-
-def fibonacci(n):
-    """
-    Function to calculate the nth Fibonacci number.
-    """
-    if n <= 1:
-        return n
-    else:
-        return fibonacci(n-1) + fibonacci(n-2)
-
-def is_prime(n):
-    """
-    Function to check if a number is prime.
-    """
-    if n <= 1:
         return False
-    for i in range(2, int(n**0.5) + 1):
-        if n % i == 0:
-            return False
-    return True
 
-# Example usage:
-print("Factorial of 5:", calculate_factorial(5))
-print("Fibonacci sequence up to 10:")
-for i in range(10):
-    print(fibonacci(i), end=" ")
-print("\nIs 17 prime?", is_prime(17))
+# Test the function
+if __name__ == "__main__":
+    print(is_even(4))  # Expected: True
+    print(is_even(5))  # Expected: False
