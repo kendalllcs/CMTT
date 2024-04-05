@@ -1,0 +1,33 @@
+Summary Report
+==============
+
+Overall Metrics:
+----------------
+Total Files Analyzed: 10
+Total Lines of Code: 500
+Total Cyclomatic Complexity: 100
+Overall Defect Density: 0.02
+
+Average Metrics:
+----------------
+Average Lines of Code per File: 50
+Average Cyclomatic Complexity per File: 10
+
+Individual File Metrics:
+-------------------------
+1. File: example.py
+   - Lines of Code: 50
+   - Cyclomatic Complexity: 8
+   - Code Coverage: 80%
+
+2. File: another_example.py
+   - Lines of Code: 30
+   - Cyclomatic Complexity: 5
+   - Code Coverage: 90%
+
+...
+
+Recommendations:
+----------------
+- Consider refactoring high-complexity functions to improve maintainability.
+- Increase test coverage in critical areas with low coverage.
