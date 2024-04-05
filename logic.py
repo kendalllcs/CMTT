@@ -1,148 +1,112 @@
 import os
-import time
+import sys
 import subprocess
 import shutil
 from coverage import Coverage
-import radon.metrics as metrics
 import radon.complexity as complexity
-from watchdog.observers import Observer
-from watchdog.events import FileSystemEventHandler
-from rich import print
+import radon.metrics as metrics
+from rich.console import Console
 
 cov = Coverage()
-cov.start()
 
-analyzed_files = set()  # Keep track of analyzed files
+class FileEventHandler:
+    def __init__(self, directory='cloneHere'):
+        self.directory = directory
 
-class FileEventHandler(FileSystemEventHandler):
-    def on_created(self, event):
-        if event.is_directory:
-            return
-        elif event.src_path.endswith('.py'):
-            if event.src_path not in analyzed_files:  # Check if file has already been analyzed
-                print("[bold yellow]Analyzing file:[/bold yellow] {event.src_path}")
-                analyze_neighboring_file(event.src_path)
-                analyzed_files.add(event.src_path)  # Add file to analyzed_files set
+    def analyze_neighboring_files(self):
+        if os.path.exists(self.directory):
+            python_files = [os.path.join(self.directory, file) for file in os.listdir(self.directory) if file.endswith('.py')]
+            for file_path in python_files:
+                self.analyze_file(file_path)
+        else:
+            print("Directory 'cloneHere' does not exist.")
+
+    def analyze_file(self, file_path):
+        console = Console()
+        console.print(f"Analyzing file: [bold red]{file_path}[/bold red]", style="bold red")
+
+        try:
+            with open(file_path, 'r') as file:
+                code = file.read()
+
+            # Lines of Code (LOC) - using radon
+            loc = sum(1 for _ in code.split('\n') if _)
+
+            # Cyclomatic Complexity - using radon
+            cc_results = complexity.cc_visit(code)
+
+            # Start a new coverage analysis session
+            cov.erase()
+            cov.start()
+
+            # Execute the file
+            result = subprocess.run([sys.executable, '-m', 'coverage', 'run', '--parallel-mode', file_path], capture_output=True)
+
+            # Stop coverage and save data
+            cov.stop()
+            cov.save()
+            cov.combine()
+            cov.report(file=sys.stdout)
+            cov.html_report(directory=os.path.join(self.directory, 'htmlcov'))
+
+            if result.returncode != 0:
+                console.print(f"Error running file {file_path}: {result.stderr.decode('utf-8')}", style="bold red")
+                return
+
+            # Output results
+            console.print(f"Lines of Code (LOC): {loc}", style="bold green")
+
+            console.print("Cyclomatic Complexity:", style="bold green")
+            for item in cc_results:
+                console.print(f"Function: {item.name}, Complexity: {item.complexity}", style="green")
+
+            # Defect Density calculation - Placeholder for defects per LOC
+            defects = 0  # You would replace this with the actual number of known defects
+            defect_density = defects / (loc if loc > 0 else 1)
+            console.print(f"Defect Density: {defect_density}", style="bold green")
+
+        except Exception as e:
+            console.print(f"Error analyzing file: {e}", style="bold red")
+
+# Rest of the functions unchanged
 
 
-
+# Add the missing clone_github_repo function
 def clone_github_repo(git_link):
     """
     Clones a GitHub repository into the 'cloneHere' directory.
     """
-    try:
-        if os.path.exists('cloneHere') and os.listdir('cloneHere'):
-            # Prompt user to confirm if they want to proceed with cloning
-            response = input("The 'cloneHere' directory is not empty. "
-                             "Cloning will overwrite existing contents. Proceed? (y/n): ")
-            if response.lower() != 'y':
-                print("Cloning cancelled.")
-                return
-            # Clear existing contents of 'cloneHere' directory
-            shutil.rmtree('cloneHere')
-        subprocess.run(['git', 'clone', git_link, 'cloneHere'])
-        print("Cloning done.")
-        print("Your file is ready to be analyzed.")
-    except Exception as e:
-        print(f"Error cloning repository: {e}")
+    clone_dir = 'cloneHere'
+    if os.path.exists(clone_dir) and os.listdir(clone_dir):
+        response = input("The 'cloneHere' directory is not empty. Cloning will overwrite existing contents. Proceed? (y/n): ")
+        if response.lower() != 'y':
+            print("Cloning cancelled.")
+            return
+        shutil.rmtree(clone_dir)
+    if not os.path.exists(clone_dir):
+        os.makedirs(clone_dir)
+    
+    subprocess.run(['git', 'clone', git_link, clone_dir], check=True)
+    print("Repository cloned successfully into 'cloneHere'.")
 
+# Add the missing delete_all_files function
 def delete_all_files():
     """
-    Deletes all files and directories in the 'cloneHere' directory.
+    Deletes all files in 'cloneHere'.
     """
-    try:
-        if os.path.exists('cloneHere') and os.path.isdir('cloneHere'):
-            shutil.rmtree('cloneHere')
-            os.mkdir('cloneHere')  # Recreate the 'cloneHere' directory after deletion
-            print("All files deleted successfully.")
-        else:
-            print("'cloneHere' directory does not exist.")
-    except Exception as e:
-        print(f"Error deleting files: {e}")
-
-def analyze_neighboring_file(file_path):
-    """
-    Analyzes a Python file for LOC, Cyclomatic Complexity, Defect Density,
-    and includes code coverage.
-    """
-    if os.path.isfile(file_path):
-        try:
-            with open(file_path, 'r') as file:
-                code = file.read()
-                print("[bold cyan]Code from file:[/bold cyan]")
-                print(code)
-
-                loc = code.count('\n') + 1
-                cc_results = complexity.cc_visit(code)
-                print("[blue]LOC:[/blue] [cyan]" + str(loc) + "[/cyan]")
-
-                print("[bold cyan]Cyclomatic Complexity:[/bold cyan]")
-                for result in cc_results:
-                    print("[green]Function:[/green] [bold green]" + result.name + "[/bold green], [green]Complexity:[/green] [bold green]" + str(result.complexity) + "[/bold green]")
-
-                # Start coverage analysis
-                cov.start()
-
-                # Execute the Python file
-                subprocess.run(['python', file_path], check=True)
-
-                # Stop coverage and save the report
-                cov.stop()
-
-                # Coverage reporting
-                with open('coverage_report.txt', 'w') as coverage_file:
-                    cov.report(file=coverage_file)  # Report coverage for the analyzed file
-
-                # Display coverage report
-                with open('coverage_report.txt', 'r') as coverage_file:
-                    print("[bold magenta]Coverage Report[/bold magenta]")
-                    print(coverage_file.read())
-
-                missed_lines = code.count('\n')
-                total_lines = loc
-                defect_density = missed_lines / total_lines if total_lines > 0 else 0
-                print("[blue]Defect Density:[/blue] [cyan]" + "{:.2f}".format(defect_density) + "[/cyan]")
-
-                print("[bold magenta]Coverage Report Generated.[/bold magenta]")
-
-        except Exception as e:
-            print(f"Error analyzing file: {e}")
+    clone_dir = 'cloneHere'
+    if os.path.exists(clone_dir):
+        shutil.rmtree(clone_dir)
+        os.makedirs(clone_dir)
+        print("All files deleted successfully.")
     else:
-        print("File not found.")
+        print("'cloneHere' directory does not exist.")
 
-def start_monitoring(folder):
-    event_handler = FileEventHandler()
-    observer = Observer()
-    observer.schedule(event_handler, folder, recursive=False)
-    observer.start()
-    try:
-        while True:
-            time.sleep(1)
-    except KeyboardInterrupt:
-        observer.stop()
-        observer.join()
-
-def generate_summary_report():
-    """
-    Generate a summary report of metrics.
-    """
-    print("Generating summary report...")
-    # You can include any summary metrics you want here
-    # For example, average LOC, average complexity, etc.
-    # This function should generate a report summarizing the metrics obtained from the analysis.
-
+# Add the missing display_summary_report function
 def display_summary_report():
     """
-    Display a summary report of metrics.
+    Displays a summary report of metrics.
     """
-    print("Displaying summary report...")
-    generate_summary_report()
-    # You can display the generated summary report here
+    print("Summary report feature is not implemented yet.")
 
-def main():
-    folder_to_monitor = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'cloneHere'))
-    print("Neighboring directory:", folder_to_monitor)
-    start_monitoring(folder_to_monitor)
-
-if __name__ == "__main__":
-    main()
+# Remove the __main__ check as it's not needed anymore
