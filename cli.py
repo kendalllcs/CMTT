@@ -9,10 +9,8 @@ from rich.console import Console
 from rich.theme import Theme
 
 from logic import clone_github_repo, delete_all_files, display_summary_report, FileEventHandler
-
+from instructions import display_instructions  # Importing the instructions module
 from ascii_art import get_ascii_art
-
-
 
 # Custom theme for the Rich Console
 custom_theme = Theme({
@@ -41,6 +39,7 @@ class FileEventHandler:
             console.print("Directory 'cloneHere' does not exist.", style="error")
 
     def analyze_file(self, file_path):
+        console.clear()  # Clear the screen before displaying analysis results
         console.print(f"Analyzing file: [bold red]{file_path}[/bold red]")
 
         try:
@@ -88,50 +87,103 @@ class FileEventHandler:
             console.print(f"Error analyzing file: {e}", style="error")
 
 # Add the missing clone_github_repo function
+def clone_github_repo(git_link):
+    """
+    Clones a GitHub repository into the 'cloneHere' directory.
+    """
+    clone_dir = 'cloneHere'
+    if os.path.exists(clone_dir) and os.listdir(clone_dir):
+        response = input("The 'cloneHere' directory is not empty. Cloning will overwrite existing contents. Proceed? (y/n): ")
+        if response.lower() != 'y':
+            print("Cloning cancelled.")
+            return
+        shutil.rmtree(clone_dir)
+    if not os.path.exists(clone_dir):
+        os.makedirs(clone_dir)
+    
+    subprocess.run(['git', 'clone', git_link, clone_dir], check=True)
+    print("Repository cloned successfully into 'cloneHere'.")
+
 # Add the missing delete_all_files function
+def delete_all_files():
+    """
+    Deletes all files in 'cloneHere'.
+    """
+    clone_dir = 'cloneHere'
+    if os.path.exists(clone_dir):
+        shutil.rmtree(clone_dir)
+        os.makedirs(clone_dir)
+        print("All files deleted successfully.")
+    else:
+        print("'cloneHere' directory does not exist.")
+
 # Add the missing display_summary_report function
+def display_summary_report():
+    """
+    Displays a summary report of metrics.
+    """
+    print("Summary report feature is not implemented yet.")
+
+def wait_and_clear():
+    """Waits for the user to press 'c' and then clears the screen."""
+    input("\nPress Enter to continue...")
+    console.clear()
 
 # Add main function
 def main_menu():
-    ascii_logo = get_ascii_art()
-    console.print(center_text(ascii_logo))
-    console.print(center_text("Welcome to Code Metrics Tool CLI"))
-    console.print(center_text("[1] - How to use"))
-    console.print(center_text("[2] - Clone a GitHub repo into cloneHere"))
-    console.print(center_text("[3] - Get Metrics"))
-    console.print(center_text("[6] - Generate and display a summary report"))
-    console.print(center_text("[7] - Delete all files"))
-    console.print(center_text("[8] - Exit"))
-    
-
-    file_event_handler = FileEventHandler()  # Create an instance of FileEventHandler
+    # Create an instance of FileEventHandler
+    file_event_handler = FileEventHandler(directory='cloneHere')
 
     while True:
-        choice = input("\nEnter your choice (1-8), or 'exit' to quit: ")
+        console.clear()  # Clear the screen before displaying the menu
+        console.print(get_ascii_art(), style="bold magenta")  # Display the ASCII logo
+        console.print("[1] - How to use", style="info")
+        console.print("[2] - Clone a GitHub repo into cloneHere", style="info")
+        console.print("[3] - Get Metrics", style="info")
+        console.print("[4] - Generate and display a summary report", style="info")
+        console.print("[5] - Delete all files", style="info")
+        console.print("[0] - Exit", style="info")
 
-        if choice == 'exit' or choice == '8':
+        choice = console.input("\nEnter your choice (1-5 or 0 to EXIT), or 'exit' to quit: ")
+
+        if choice.lower() == 'exit' or choice == '0':
             break
 
         if choice == '1':
-            console.print("How to use instructions...")
+            console.clear()  # Clear the screen before displaying instructions
+            display_instructions()  # Assuming this function prints the instructions
+            wait_and_clear()
 
         elif choice == '2':
-            git_link = input("Enter the .git link to clone: ")
+            console.clear()
+            git_link = console.input("Enter the .git link to clone (or type 'exit' to return to main menu): ")
+            if git_link.lower() == 'exit':
+                continue  # Go back to the main menu loop
             clone_github_repo(git_link)
+            wait_and_clear()
 
         elif choice == '3':
+            console.clear()
+            # Use the file_event_handler instance here
             file_event_handler.analyze_neighboring_files()
+            wait_and_clear()
 
-        elif choice == '6':
+        elif choice == '4':
+            console.clear()
             display_summary_report()
+            wait_and_clear()
 
-        elif choice == '7':
+        elif choice == '5':
+            console.clear()
             delete_all_files()
+            wait_and_clear()
 
         else:
-            console.print("Invalid choice. Please enter a valid option.")
+            console.print("Invalid choice. Please enter a valid option.", style="error")
+            wait_and_clear()
 
-    console.print("Exiting Code Metrics Tool CLI.")
+    console.print("Exiting Code Metrics Tool CLI.", style="warning")
+
 
 def main():
     parser = argparse.ArgumentParser(description='Code Metrics Tool CLI')

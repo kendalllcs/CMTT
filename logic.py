@@ -4,10 +4,10 @@ import subprocess
 import shutil
 from coverage import Coverage
 import radon.complexity as complexity
-import radon.metrics as metrics
 from rich.console import Console
 
-cov = Coverage()
+# Create an instance of the Console class
+console = Console()
 
 class FileEventHandler:
     def __init__(self, directory='cloneHere'):
@@ -19,10 +19,9 @@ class FileEventHandler:
             for file_path in python_files:
                 self.analyze_file(file_path)
         else:
-            print("Directory 'cloneHere' does not exist.")
+            console.print("Directory 'cloneHere' does not exist.")
 
     def analyze_file(self, file_path):
-        console = Console()
         console.print(f"Analyzing file: [bold red]{file_path}[/bold red]", style="bold red")
 
         try:
@@ -36,7 +35,7 @@ class FileEventHandler:
             cc_results = complexity.cc_visit(code)
 
             # Start a new coverage analysis session
-            cov.erase()
+            cov = Coverage()
             cov.start()
 
             # Execute the file
@@ -70,24 +69,34 @@ class FileEventHandler:
 
 # Rest of the functions unchanged
 
-
 # Add the missing clone_github_repo function
 def clone_github_repo(git_link):
     """
     Clones a GitHub repository into the 'cloneHere' directory.
+    Allows the user to exit back to the main menu without inputting a link.
     """
+    # Check if the user wants to exit back to the main menu
+    if git_link.lower() == 'exit':
+        console.print("Exiting to main menu...", style="warning")
+        return  # Exit the function early
+
     clone_dir = 'cloneHere'
     if os.path.exists(clone_dir) and os.listdir(clone_dir):
         response = input("The 'cloneHere' directory is not empty. Cloning will overwrite existing contents. Proceed? (y/n): ")
         if response.lower() != 'y':
-            print("Cloning cancelled.")
+            console.print("Cloning cancelled.", style="error")
             return
         shutil.rmtree(clone_dir)
+
     if not os.path.exists(clone_dir):
         os.makedirs(clone_dir)
-    
-    subprocess.run(['git', 'clone', git_link, clone_dir], check=True)
-    print("Repository cloned successfully into 'cloneHere'.")
+
+    try:
+        subprocess.run(['git', 'clone', git_link, clone_dir], check=True)
+        console.print("Repository cloned successfully into 'cloneHere'.", style="success")
+    except Exception as e:
+        console.print(f"Error cloning repository: {e}", style="error")
+
 
 # Add the missing delete_all_files function
 def delete_all_files():
