@@ -5,30 +5,9 @@ import shutil
 from coverage import Coverage
 import radon.complexity as complexity
 from rich.console import Console
-import stat
 
 # Create an instance of the Console class
 console = Console()
-
-def on_rm_error(func, path, exc_info):
-    """
-    Error handler for shutil.rmtree.
-
-    If the error is due to an access error (read-only file)
-    it attempts to add write permission and then retries.
-
-    If the error is for another reason it re-raises the error.
-
-    Usage : shutil.rmtree(path, onerror=on_rm_error)
-    """
-    # Check if the file access issue is due to it being read-only
-    if not os.access(path, os.W_OK):
-        # Try making the file writable
-        os.chmod(path, stat.S_IWUSR)
-        # Try the delete operation again
-        func(path)
-    else:
-        raise  # Re-raise the error if it's not a permission issue
 
 class FileEventHandler:
     def __init__(self, directory='cloneHere'):
@@ -122,22 +101,15 @@ def clone_github_repo(git_link):
 # Add the missing delete_all_files function
 def delete_all_files():
     """
-    Deletes all files in 'cloneHere' after user confirmation.
+    Deletes all files in 'cloneHere'.
     """
     clone_dir = 'cloneHere'
     if os.path.exists(clone_dir):
-        # Asking for user confirmation before proceeding with the deletion
-        confirmation = input("Are you sure you want to delete all files in 'cloneHere'? [y/N]: ")
-        if confirmation.lower() == 'y':
-            # Use the error handling function on_rm_error
-            shutil.rmtree(clone_dir, onerror=on_rm_error)
-            os.makedirs(clone_dir)
-            print("All files deleted successfully.")
-        else:
-            print("Deletion cancelled.")
+        shutil.rmtree(clone_dir)
+        os.makedirs(clone_dir)
+        print("All files deleted successfully.")
     else:
         print("'cloneHere' directory does not exist.")
-
 
 # Add the missing display_summary_report function
 def display_summary_report():

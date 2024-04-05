@@ -107,18 +107,15 @@ def clone_github_repo(git_link):
 # Add the missing delete_all_files function
 def delete_all_files():
     """
-    Deletes all files in 'cloneHere'. Assumes confirmation has already been given.
+    Deletes all files in 'cloneHere'.
     """
     clone_dir = 'cloneHere'
     if os.path.exists(clone_dir):
-        try:
-            shutil.rmtree(clone_dir)
-            os.makedirs(clone_dir)
-            console.print("All files deleted successfully.", style="success")
-        except Exception as e:
-            console.print(f"Error deleting files: {e}", style="error")
+        shutil.rmtree(clone_dir)
+        os.makedirs(clone_dir)
+        print("All files deleted successfully.")
     else:
-        console.print("'cloneHere' directory does not exist.", style="error")
+        print("'cloneHere' directory does not exist.")
 
 # Add the missing display_summary_report function
 def display_summary_report():
@@ -177,13 +174,8 @@ def main_menu():
             wait_and_clear()
 
         elif choice == '5':
-            console.clear()
-            confirmation = console.input("Are you sure you want to delete all files in 'cloneHere'? [y/N]: ")
-            if confirmation.lower() == 'y':
-                delete_all_files()  # This calls the function imported from logic.py
-                console.print("All files in 'cloneHere' have been deleted.", style="success")
-            else:
-                console.print("Operation cancelled.", style="warning")
+            clear_screen()
+            delete_all_files()
             wait_and_clear()
 
         else:
