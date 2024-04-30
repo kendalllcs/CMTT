@@ -15,7 +15,7 @@ CMTT aims to offer quick assessments of software quality metrics such as Lines o
 - **Metric Collection:** Collects and analyzes essential software metrics including LOC, Cyclomatic Complexity, Code Coverage, and Defect Density.
 - **Expandability:** Designed with future integration of additional metrics and a Graphical User Interface (GUI) in mind.
 - **Neighboring File Analysis:** Monitors a designated folder (`cloneHere`) for Python files, automatically analyzing any new files for metrics.
-- **Defect Tracking Integration:** Integrates with bug tracking systems like JIRA, Bugzilla, or GitHub Issues to fetch defect data for analyzed files, enhancing the defect density calculations.
+- **(Coming Soon) Defect Tracking Integration:** Integrates with bug tracking systems like JIRA, Bugzilla, or GitHub Issues to fetch defect data for analyzed files, enhancing the defect density calculations.
 - **Summary Reporting:** Generates detailed summary reports in `summaryReports` folder, providing actionable insights and suggestions based on analyzed metrics.
 
 ## Getting Started
