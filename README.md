@@ -38,10 +38,16 @@ flowchart TD;
     B --> C[Main Menu]
     C --> D{Option Selected}
     D -->|How to Use| E[Display Instructions]
-    D -->|Get Metrics| F[Analyze Neighboring Files]
-    D -->|Generate Summary Report| G[Generate and Display Summary]
+    D -->|Get Metrics| F1[Check cloneHere Directory Exists]
+    F1 -->|Exists| F[Analyze Neighboring Files]
+    F1 -->|Does Not Exist| F2[Print Error: Directory not found]
+    D -->|Generate Summary Report| G1[Check summaryReports Directory]
+    G1 -->|Exists| G[Generate and Display Summary]
+    G1 -->|Does Not Exist| G2[Create summaryReports Directory]
+    G2 --> G
     D -->|Exit| H[Exit Program]
     E --> I[Wait and Clear Screen] --> C
+    F2 --> I
     F --> I
     G --> I
     H --> J[End]
