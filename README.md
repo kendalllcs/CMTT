@@ -42,7 +42,7 @@ flowchart TD;
     F1 -->|Exists| F[Analyze Neighboring Files]
     F1 -->|Does Not Exist| F2[Print Error: Directory not found]
     D -->|Generate Summary Report| G1[Check summaryReports Directory]
-    G1 -->|Exists| G[Generate and Display Summary]
+    G1 -->|Exists| G[Generate Summary into summaryReports]
     G1 -->|Does Not Exist| G2[Create summaryReports Directory]
     G2 --> G
     D -->|Exit| H[Exit Program]
