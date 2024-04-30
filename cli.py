@@ -86,53 +86,11 @@ class FileEventHandler:
         except Exception as e:
             console.print(f"Error analyzing file: {e}", style="error")
 
-# Add the missing clone_github_repo function
-def clone_github_repo(git_link):
-    """
-    Clones a GitHub repository into the 'cloneHere' directory.
-    """
-    clone_dir = 'cloneHere'
-    if os.path.exists(clone_dir) and os.listdir(clone_dir):
-        response = input("The 'cloneHere' directory is not empty. Cloning will overwrite existing contents. Proceed? (y/n): ")
-        if response.lower() != 'y':
-            print("Cloning cancelled.")
-            return
-        shutil.rmtree(clone_dir)
-    if not os.path.exists(clone_dir):
-        os.makedirs(clone_dir)
-    
-    subprocess.run(['git', 'clone', git_link, clone_dir], check=True)
-    print("Repository cloned successfully into 'cloneHere'.")
-
-# Add the missing delete_all_files function
-def delete_all_files():
-    """
-    Deletes all files in 'cloneHere'. Assumes confirmation has already been given.
-    """
-    clone_dir = 'cloneHere'
-    if os.path.exists(clone_dir):
-        try:
-            shutil.rmtree(clone_dir)
-            os.makedirs(clone_dir)
-            console.print("All files deleted successfully.", style="success")
-        except Exception as e:
-            console.print(f"Error deleting files: {e}", style="error")
-    else:
-        console.print("'cloneHere' directory does not exist.", style="error")
-
-# Add the missing display_summary_report function
-def display_summary_report():
-    """
-    Displays a summary report of metrics.
-    """
-    print("Summary report feature is not implemented yet.")
-
 def wait_and_clear():
     """Waits for the user to press 'c' and then clears the screen."""
     input("\nPress Enter to continue...")
     console.clear()
 
-# Add main function
 def main_menu():
     # Create an instance of FileEventHandler
     file_event_handler = FileEventHandler(directory='cloneHere')
@@ -141,13 +99,11 @@ def main_menu():
         console.clear()  # Clear the screen before displaying the menu
         console.print(get_ascii_art(), style="bold magenta")  # Display the ASCII logo
         console.print("[1] - How to use", style="info")
-        console.print("[2] - Clone a GitHub repo into cloneHere", style="info")
-        console.print("[3] - Get Metrics", style="info")
-        console.print("[4] - Generate and display a summary report", style="info")
-        console.print("[5] - Delete all files", style="info")
+        console.print("[2] - Get Metrics", style="info")
+        console.print("[3] - Generate and display a summary report", style="info")
         console.print("[0] - Exit", style="info")
 
-        choice = console.input("\nEnter your choice (1-5 or 0 to EXIT), or 'exit' to quit: ")
+        choice = console.input("\nEnter your choice (1-3 or 0 to EXIT), or 'exit' to quit: ")
 
         if choice.lower() == 'exit' or choice == '0':
             break
@@ -159,31 +115,13 @@ def main_menu():
 
         elif choice == '2':
             clear_screen()
-            git_link = console.input("Enter the .git link to clone (or type 'exit' to return to main menu): ")
-            if git_link.lower() == 'exit':
-                continue  # Go back to the main menu loop
-            clone_github_repo(git_link)
-            wait_and_clear()
-
-        elif choice == '3':
-            clear_screen()
             # Use the file_event_handler instance here
             file_event_handler.analyze_neighboring_files()
             wait_and_clear()
 
-        elif choice == '4':
+        elif choice == '3':
             clear_screen()
             display_summary_report()
-            wait_and_clear()
-
-        elif choice == '5':
-            console.clear()
-            confirmation = console.input("Are you sure you want to delete all files in 'cloneHere'? [y/N]: ")
-            if confirmation.lower() == 'y':
-                delete_all_files()  # This calls the function imported from logic.py
-                console.print("All files in 'cloneHere' have been deleted.", style="success")
-            else:
-                console.print("Operation cancelled.", style="warning")
             wait_and_clear()
 
         else:
@@ -196,7 +134,6 @@ def clear_screen():
     """Clears the terminal screen."""
     os.system('cls')
 
-
 def main():
     parser = argparse.ArgumentParser(description='Code Metrics Tool CLI')
     parser.add_argument('--folder', '-f', help='(Deprecated) Folder parameter is no longer used.')
@@ -206,12 +143,6 @@ def main():
         console.print("Note: The '--folder' option is deprecated and will be ignored.", style="warning")
 
     main_menu()
-
-def center_text(text):
-    terminal_width = os.get_terminal_size().columns
-    horizontal_padding = (terminal_width - len(text.splitlines()[0])) // 2
-    centered_text = '\n'.join([' ' * horizontal_padding + line for line in text.splitlines()])
-    return centered_text
 
 if __name__ == "__main__":
     main()
