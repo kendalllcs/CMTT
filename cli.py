@@ -30,6 +30,7 @@ console = Console(theme=custom_theme)
 class FileEventHandler:
     def __init__(self, directory='cloneHere'):
         self.directory = directory
+        self.all_metrics = []
 
     def analyze_neighboring_files(self):
         if os.path.exists(self.directory):
@@ -40,84 +41,77 @@ class FileEventHandler:
             console.print("Directory 'cloneHere' does not exist.", style="error")
 
     def analyze_file(self, file_path):
-        console.clear()  # Clear the screen before displaying analysis results
         console.print(f"Analyzing file: [bold red]{file_path}[/bold red]")
-
         try:
             with open(file_path, 'r') as file:
                 code = file.read()
 
-            # Lines of Code (LOC) - using radon
+            # Metrics calculation
             loc = sum(1 for _ in code.split('\n') if _)
-
-            # Cyclomatic Complexity - using radon
             cc_results = complexity.cc_visit(code)
-
-            # Start a new coverage analysis session
             cov = Coverage()
             cov.start()
-
-            # Execute the file
             result = subprocess.run([sys.executable, '-m', 'coverage', 'run', '--parallel-mode', file_path], capture_output=True)
-
-            # Stop coverage and save data
             cov.stop()
             cov.save()
             cov.combine()
+            coverage_data = cov.report(file=sys.stdout)
 
-            # Print code coverage in orange
-            cov.report(file=sys.stdout)
+            # Defect density calculation (assuming defects are tracked and counted separately)
+            defects = 0  # Placeholder; replace or calculate as needed
+            defect_density = defects / loc if loc > 0 else 0
 
             if result.returncode != 0:
                 console.print(f"Error running file {file_path}: {result.stderr.decode('utf-8')}", style="error")
                 return
 
-            # Output results
-            console.print(f"Lines of Code (LOC): {loc}", style="success")
-            console.print("Cyclomatic Complexity:")
-            for item in cc_results:
-                console.print(f"Function: {item.name}, Complexity: {item.complexity}", style="success")
-
-            # Assuming defect density calculation happens here
-            defects = 0  # Placeholder for actual defect count
-            defect_density = defects / (loc if loc > 0 else 1)
-            console.print(f"Defect Density: {defect_density}", style="success")
-
-            # Store metrics for report generation
-            self.metrics = {
+            # Storing results
+            file_metrics = {
+                'file': file_path,
                 'Lines of Code': loc,
-                'Cyclomatic Complexity': [f"{item.name}: {item.complexity}" for item in cc_results],
-                'Defect Density': defect_density
+                'Cyclomatic Complexity': cc_results,
+                'Coverage Score': coverage_data,
+                'Defect Density': defect_density,
+                'Coverage Tips': 'Increase unit tests for better coverage.' if coverage_data < 75 else 'Good coverage!',
+                'Defect Tips': 'Focus on reducing defects per LOC.' if defect_density > 0.1 else 'Low defect density, good job!'
             }
-
+            self.all_metrics.append(file_metrics)
         except Exception as e:
             console.print(f"Error analyzing file: {e}", style="error")
 
-    def get_metrics(self):
-        return self.metrics if hasattr(self, 'metrics') else {}
+
+
+    def get_all_metrics(self):
+        return self.all_metrics
 
 def display_summary_report():
+    metrics = file_event_handler.get_all_metrics()
     directory = 'summaryReports'
     if not os.path.exists(directory):
         os.makedirs(directory)
     filename = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S_summary_report.txt")
     filepath = os.path.join(directory, filename)
-    metrics = file_event_handler.get_metrics()
+
     with open(filepath, 'w') as file:
-        file.write("Metrics Summary:\n")
-        for metric_name, values in metrics.items():
-            if isinstance(values, list):
-                file.write(f"{metric_name}:\n")
-                for value in values:
-                    file.write(f"    {value}\n")
-            else:
-                file.write(f"{metric_name}: {values}\n")
-        file.write("\nTips on Improving Metrics:\n")
-        file.write("1. Reduce complexity by simplifying function logic.\n")
-        file.write("2. Increase code coverage by adding more comprehensive tests.\n")
-        file.write("\nHow to Achieve the Best Scores:\n")
-        file.write("Focus on writing clean, readable, and well-documented code. Prioritize unit testing to ensure robustness.\n")
+        for metric in metrics:
+            file.write(f"File: {metric['file']}\n")
+            file.write(f"Lines of Code: {metric['Lines of Code']}\n")
+            file.write("Cyclomatic Complexity:\n")
+            for item in metric['Cyclomatic Complexity']:
+                file.write(f"  Function: {item.name}, Complexity: {item.complexity}\n")
+            file.write(f"Coverage Score: {metric['Coverage Score']:.2f}%\n")
+            file.write(f"Defect Density: {metric['Defect Density']:.2f}\n")
+            file.write(f"Suggestions based on Coverage: {metric['Coverage Tips']}\n")
+            file.write(f"Suggestions based on Defect Density: {metric['Defect Tips']}\n\n")
+
+        # General advice section
+        file.write("\nGeneral Tips on Improving Code Quality:\n")
+        file.write("1. Aim for higher test coverage to ensure more robust code.\n")
+        file.write("2. Refactor code to simplify complex functions and reduce cyclomatic complexity.\n")
+        file.write("3. Include more detailed inline comments and documentation for better maintainability.\n")
+
     console.print(f"Summary report generated and saved to {filepath}", style="success")
+
 
 def clear_screen():
     os.system('cls' if os.name == 'nt' else 'clear')

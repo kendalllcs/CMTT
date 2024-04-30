@@ -8,3 +8,6 @@ tempCodeRunnerFile.py
 # Ignore Python bytecode cache
 __pycache__/
 *.pyc
+
+# Ignore generated summary reports
+summaryReports/
