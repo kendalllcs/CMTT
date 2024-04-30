@@ -22,7 +22,7 @@ CMTT aims to offer quick assessments of software quality metrics such as Lines o
 
 1. Clone the repository to your local machine.
 2. Install the required dependencies with `pip install -r requirements.txt`.
-3. Execute `python main.py` to start monitoring the designated folder.
+3. Execute `python cli.py` to start monitoring the designated folder.
 4. Drop Python files into the monitored folder `cloneHere` for automatic analysis.
 5. Review the generated reports in the `summaryReports` directory for insights and improvements.
 
