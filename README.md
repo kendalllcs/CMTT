@@ -30,6 +30,23 @@ CMTT aims to offer quick assessments of software quality metrics such as Lines o
 
 Ensure you have Python 3.x installed and then install project dependencies:pip install -r requirements.txt
 
+## Flowchart
+
+```mermaid
+flowchart TB
+    start([Start]) --> initialize[Initialize Rich Console]
+    initialize --> mainMenu[Main Menu]
+    mainMenu --> option1{Option Selected}
+    option1 -- "How to Use" --> instructions[Display Instructions]
+    option1 -- "Get Metrics" --> metrics[Analyze Neighboring Files]
+    option1 -- "Generate Summary Report" --> summary[Generate and Display Summary]
+    option1 -- "Exit" --> exit[Exit Program]
+    instructions --> wait[Wait and Clear Screen] --> mainMenu
+    metrics --> wait
+    summary --> wait
+    exit --> end([End])
+```
+
 
 ## Contributing
 
