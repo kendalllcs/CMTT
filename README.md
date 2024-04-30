@@ -33,22 +33,19 @@ Ensure you have Python 3.x installed and then install project dependencies:pip i
 ## Flowchart
 
 ```mermaid
-flowchart TB
-    start([Start]) --> initialize[Initialize Rich Console]
-    initialize --> mainMenu[Main Menu]
-    mainMenu --> option1{Option Selected}
-    option1 -- "How to Use" --> instructions[Display Instructions]
-    option1 -- "Get Metrics" --> metrics[Analyze Neighboring Files]
-    option1 -- "Generate Summary Report" --> summary[Generate and Display Summary]
-    option1 -- "Exit" --> exit[Exit Program]
-    instructions --> wait[Wait and Clear Screen] --> mainMenu
-    metrics --> wait
-    summary --> wait
-    exit --> end([End])
-
+flowchart TD;
+    A[Start] --> B[Initialize Rich Console]
+    B --> C[Main Menu]
+    C --> D{Option Selected}
+    D -->|How to Use| E[Display Instructions]
+    D -->|Get Metrics| F[Analyze Neighboring Files]
+    D -->|Generate Summary Report| G[Generate and Display Summary]
+    D -->|Exit| H[Exit Program]
+    E --> I[Wait and Clear Screen] --> C
+    F --> I
+    G --> I
+    H --> J[End]
 ```
-
-
 ## Contributing
 
 Contributions to enhance the tool or add new features are welcome! Please fork the repository, make your changes, and submit a pull request.
