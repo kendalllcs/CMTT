@@ -1,0 +1,13 @@
+Metrics Summary:
+Lines of Code: 23
+Cyclomatic Complexity:
+    divide: 2
+    is_prime: 5
+Defect Density: 0.0
+
+Tips on Improving Metrics:
+1. Reduce complexity by simplifying function logic.
+2. Increase code coverage by adding more comprehensive tests.
+
+How to Achieve the Best Scores:
+Focus on writing clean, readable, and well-documented code. Prioritize unit testing to ensure robustness.
